@@ -1,83 +1,93 @@
 import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  FlatList,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+} from 'react-native';
 
-// ToDoForm Component (Part 2)
+// ToDoForm Component
 function ToDoForm({ inputValue, setInputValue, addTask }) {
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      addTask();
-    }
-  };
-
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-      <div className="flex gap-2">
-        <input
-          type="text"
+    <View style={styles.formContainer}>
+      <View style={styles.inputRow}>
+        <TextInput
+          style={styles.input}
           value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          onKeyPress={handleKeyPress}
+          onChangeText={setInputValue}
+          onSubmitEditing={addTask}
           placeholder="Add a new task..."
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          placeholderTextColor="#9CA3AF"
         />
-        <button
-          onClick={addTask}
-          className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={addTask}
+          activeOpacity={0.7}
         >
-          Add
-        </button>
-      </div>
-    </div>
+          <Text style={styles.addButtonText}>Add</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }
 
-// ToDoList Component (Part 2)
+// ToDoList Component
 function ToDoList({ tasks, toggleTask, deleteTask }) {
+  const renderItem = ({ item }) => (
+    <View style={styles.taskItem}>
+      <TouchableOpacity
+        onPress={() => toggleTask(item.id)}
+        style={styles.checkboxContainer}
+        activeOpacity={0.7}
+      >
+        <View style={[styles.checkbox, item.completed && styles.checkboxChecked]}>
+          {item.completed && <Text style={styles.checkmark}>✓</Text>}
+        </View>
+      </TouchableOpacity>
+      
+      <Text
+        style={[
+          styles.taskText,
+          item.completed && styles.taskTextCompleted
+        ]}
+      >
+        {item.text}
+      </Text>
+      
+      <TouchableOpacity
+        onPress={() => deleteTask(item.id)}
+        style={styles.deleteButton}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.deleteButtonText}>Delete</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
-      <div className="max-h-96 overflow-y-auto">
-        {tasks.length === 0 ? (
-          <p className="text-center text-gray-500 py-8">No tasks yet. Add one above!</p>
-        ) : (
-          <ul className="divide-y divide-gray-200">
-            {tasks.map(task => (
-              <li
-                key={task.id}
-                className="p-4 hover:bg-gray-50 transition-colors flex items-center gap-3"
-              >
-                <input
-                  type="checkbox"
-                  checked={task.completed}
-                  onChange={() => toggleTask(task.id)}
-                  className="w-5 h-5 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-500"
-                />
-                <span
-                  className={`flex-1 ${
-                    task.completed
-                      ? 'line-through text-gray-400'
-                      : 'text-gray-800'
-                  }`}
-                >
-                  {task.text}
-                </span>
-                <button
-                  onClick={() => deleteTask(task.id)}
-                  className="px-3 py-1 text-red-600 hover:bg-red-50 rounded transition-colors"
-                >
-                  Delete
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </div>
+    <View style={styles.listContainer}>
+      {tasks.length === 0 ? (
+        <Text style={styles.emptyText}>No tasks yet. Add one above!</Text>
+      ) : (
+        <FlatList
+          data={tasks}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id.toString()}
+          style={styles.list}
+        />
+      )}
+    </View>
   );
 }
 
 // App Component
 export default function App() {
   const [tasks, setTasks] = useState([
-    { id: 1, text: 'Learn React', completed: false },
+    { id: 1, text: 'Learn React Native', completed: false },
     { id: 2, text: 'Build a ToDo app', completed: false },
     { id: 3, text: 'Master component composition', completed: true }
   ]);
@@ -100,29 +110,165 @@ export default function App() {
     setTasks(tasks.filter(task => task.id !== id));
   };
 
+  const remainingTasks = tasks.filter(t => !t.completed).length;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-4xl font-bold text-center text-indigo-900 mb-8">
-          My ToDo List
-        </h1>
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.content}>
+          <Text style={styles.title}>My ToDo List</Text>
 
-        <ToDoForm 
-          inputValue={inputValue}
-          setInputValue={setInputValue}
-          addTask={addTask}
-        />
+          <ToDoForm 
+            inputValue={inputValue}
+            setInputValue={setInputValue}
+            addTask={addTask}
+          />
 
-        <ToDoList 
-          tasks={tasks}
-          toggleTask={toggleTask}
-          deleteTask={deleteTask}
-        />
+          <ToDoList 
+            tasks={tasks}
+            toggleTask={toggleTask}
+            deleteTask={deleteTask}
+          />
 
-        <div className="mt-4 text-center text-gray-600">
-          {tasks.filter(t => !t.completed).length} of {tasks.length} tasks remaining
-        </div>
-      </div>
-    </div>
+          <Text style={styles.footer}>
+            {remainingTasks} of {tasks.length} tasks remaining
+          </Text>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#EEF2FF',
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 32,
+    maxWidth: 600,
+    alignSelf: 'center',
+    width: '100%',
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#312E81',
+    marginBottom: 32,
+  },
+  formContainer: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  inputRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  input: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 8,
+    fontSize: 16,
+    color: '#1F2937',
+  },
+  addButton: {
+    backgroundColor: '#4F46E5',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    justifyContent: 'center',
+  },
+  addButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  listContainer: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+    overflow: 'hidden',
+  },
+  list: {
+    maxHeight: 400,
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: '#6B7280',
+    paddingVertical: 32,
+    fontSize: 16,
+  },
+  taskItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+    gap: 12,
+  },
+  checkboxContainer: {
+    padding: 4,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderWidth: 2,
+    borderColor: '#4F46E5',
+    borderRadius: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkboxChecked: {
+    backgroundColor: '#4F46E5',
+  },
+  checkmark: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  taskText: {
+    flex: 1,
+    fontSize: 16,
+    color: '#1F2937',
+  },
+  taskTextCompleted: {
+    textDecorationLine: 'line-through',
+    color: '#9CA3AF',
+  },
+  deleteButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  deleteButtonText: {
+    color: '#DC2626',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  footer: {
+    marginTop: 16,
+    textAlign: 'center',
+    color: '#4B5563',
+    fontSize: 14,
+  },
+});
