@@ -1,32 +1,36 @@
 import React from 'react';
-import {
-  View,
-  TextInput,
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-} from 'react-native';
+import { View, TextInput, Button, StyleSheet } from 'react-native';
 
-export default function ToDoForm({ inputValue, setInputValue, addTask }) {
+// Destructure addTask function from props
+export default function ToDoForm({ addTask }) {
+  // Part 2: Step 1 - Use useState to manage local state
+  const [taskText, setTaskText] = React.useState('');
+
+  // Part 4: Enhancement - Clear input and prevent duplicates
+  const handleAddTask = () => {
+    if (taskText.trim()) {
+      addTask(taskText);
+      setTaskText(''); // Clear input after adding
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <View style={styles.inputRow}>
-        <TextInput
-          style={styles.input}
-          value={inputValue}
-          onChangeText={setInputValue}
-          onSubmitEditing={addTask}
-          placeholder="Add a new task..."
-          placeholderTextColor="#9CA3AF"
-        />
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={addTask}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.addButtonText}>Add</Text>
-        </TouchableOpacity>
-      </View>
+      {/* Part 2: Step 2 - Input field with event handling */}
+      <TextInput
+        style={styles.input}
+        placeholder="Add a new task..."
+        onChangeText={text => setTaskText(text)}
+        value={taskText}
+        onSubmitEditing={handleAddTask}
+      />
+
+      {/* Part 2: Step 3 - Button with onPress event */}
+      <Button
+        title="Add Task"
+        onPress={() => addTask(taskText)}
+        color="#4F46E5"
+      />
     </View>
   );
 }
@@ -42,31 +46,17 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
-  },
-  inputRow: {
-    flexDirection: 'row',
-    gap: 8,
+    gap: 12,
   },
   input: {
-    flex: 1,
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 12,
     borderWidth: 1,
     borderColor: '#D1D5DB',
     borderRadius: 8,
     fontSize: 16,
     color: '#1F2937',
-  },
-  addButton: {
-    backgroundColor: '#4F46E5',
-    paddingHorizontal: 24,
-    paddingVertical: 8,
-    borderRadius: 8,
-    justifyContent: 'center',
-  },
-  addButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
+    backgroundColor: '#FFFFFF',
   },
 });
+  
